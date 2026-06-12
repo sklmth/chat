@@ -2,68 +2,52 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { createClient } = require('redis');
-const db = require('./db/database');
+const path = require('path');
+
+// 初始化数据库（会执行迁移脚本）
+require('./src/models/database');
+
+// 导入路由和Socket处理器
+const apiRoutes = require('./src/routes/api');
+const initializeSocket = require('./src/socket');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const REDIS_KEY = 'chat:messages';
-const CACHE_LIMIT = 50;
+// 中间件
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const redis = createClient({ url: process.env.REDIS_URL });
-redis.on('error', err => console.error('Redis error:', err));
-redis.connect();
-
+// 静态文件服务
 app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 
-const adjectives = ['愤怒的','神秘的','迷失的','快乐的','忧郁的','慵懒的','暴躁的','冷静的','可爱的','凶猛的'];
-const nouns      = ['柠檬🍋','土豆🥔','章鱼🐙','仙人掌🌵','企鹅🐧','猫头鹰🦉','河豚🐡','松鼠🐿️','鳄鱼🐊','海豹🦭'];
-const genNick = () => adjectives[Math.random()*adjectives.length|0] + nouns[Math.random()*nouns.length|0];
+// API路由
+app.use('/api', apiRoutes);
 
-io.on('connection', async socket => {
-  const nickname = genNick();
-  socket.data.nickname = nickname;
+// 错误处理中间件
+app.use(errorHandler);
 
-  // 先读 Redis 缓存，没有则从 SQLite 加载
-  let history = await redis.lRange(REDIS_KEY, 0, -1);
-  if (history.length === 0) {
-    const rows = db.getRecent();
-    if (rows.length) {
-      const pipeline = redis.multi();
-      rows.forEach(r => pipeline.rPush(REDIS_KEY, JSON.stringify({ nickname: r.nickname, content: r.content, time: r.created_at })));
-      pipeline.lTrim(REDIS_KEY, -CACHE_LIMIT, -1);
-      await pipeline.exec();
-      history = await redis.lRange(REDIS_KEY, 0, -1);
-    }
-  }
+// 初始化Socket.IO
+initializeSocket(io);
 
-  socket.emit('init', {
-    nickname,
-    history: history.map(s => JSON.parse(s)),
-  });
-
-  socket.on('message', async content => {
-    if (!content || typeof content !== 'string' || content.trim().length === 0) return;
-    const msg = { nickname: socket.data.nickname, content: content.trim(), time: Date.now() };
-
-    // 写 Redis（缓存）
-    await redis.rPush(REDIS_KEY, JSON.stringify(msg));
-    await redis.lTrim(REDIS_KEY, -CACHE_LIMIT, -1);
-
-    // 异步落盘 SQLite
-    db.saveMessage(msg.nickname, msg.content);
-
-    io.emit('message', msg);
-  });
-
-  socket.on('disconnect', () => {
-    io.emit('system', `${nickname} 离开了聊天室`);
-  });
-
-  io.emit('system', `${nickname} 加入了聊天室`);
+// 启动服务器
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log('=================================');
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 Socket.IO initialized`);
+  console.log(`🗄️  Database ready`);
+  console.log('=================================');
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// 优雅关闭
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, closing server...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});

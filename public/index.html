@@ -4,21 +4,202 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>匿名聊天室</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="/assets/css/chat.css">
+  <link rel="stylesheet" href="/assets/css/media.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <span>匿名聊天室</span>
-      <span id="my-nick"></span>
-    </header>
-    <div id="messages"></div>
-    <form id="form">
-      <input id="input" type="text" placeholder="说点什么..." autocomplete="off" maxlength="300">
-      <button type="submit">发送</button>
-    </form>
+  <div id="app" class="app-container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="app-title">💬 匿名聊天</h1>
+        <div class="user-info">
+          <span class="user-avatar" id="userAvatar">👤</span>
+          <span class="user-nickname" id="userNickname">加载中...</span>
+        </div>
+      </div>
+
+      <!-- 房间列表 -->
+      <div class="sidebar-section">
+        <div class="section-header">
+          <h3>房间列表</h3>
+          <span class="online-badge" id="totalOnline">0人在线</span>
+        </div>
+        <div class="room-list" id="roomList">
+          <!-- 房间项将通过JS动态生成 -->
+        </div>
+      </div>
+
+      <!-- 私聊列表 -->
+      <div class="sidebar-section">
+        <div class="section-header">
+          <h3>私聊</h3>
+        </div>
+        <div class="private-list" id="privateList">
+          <div class="empty-state">暂无私聊</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主聊天区域 -->
+    <main class="chat-container">
+      <!-- 聊天头部 -->
+      <header class="chat-header">
+        <div class="room-info">
+          <span class="room-icon" id="currentRoomIcon">🏠</span>
+          <div>
+            <h2 class="room-name" id="currentRoomName">大厅</h2>
+            <p class="room-status" id="roomStatus">连接中...</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="toggleInfoPanel" title="显示/隐藏信息面板">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- 消息列表 -->
+      <div class="messages-container" id="messagesContainer">
+        <div class="messages-list" id="messagesList">
+          <!-- 消息将通过JS动态生成 -->
+        </div>
+        <div class="scroll-to-bottom" id="scrollToBottom" style="display: none;">
+          <button class="scroll-btn">↓ 新消息</button>
+        </div>
+      </div>
+
+      <!-- 正在输入指示器 -->
+      <div class="typing-indicator" id="typingIndicator" style="display: none;">
+        <span class="typing-text">有人正在输入...</span>
+      </div>
+
+      <!-- 输入区域 -->
+      <div class="input-container">
+        <div class="input-actions">
+          <button class="action-btn" id="uploadImageBtn" title="上传图片">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </button>
+          <button class="action-btn" id="uploadFileBtn" title="上传文件">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+          </button>
+          <button class="action-btn" id="uploadAudioBtn" title="上传音频">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <form class="message-form" id="messageForm">
+          <input
+            type="text"
+            class="message-input"
+            id="messageInput"
+            placeholder="说点什么..."
+            autocomplete="off"
+            maxlength="2000"
+          >
+          <button type="submit" class="send-btn" id="sendBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <span>发送</span>
+          </button>
+        </form>
+
+        <!-- 文件上传隐藏输入 -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <input type="file" id="fileInput" accept=".pdf,.zip,.txt,.doc,.docx" style="display: none;">
+        <input type="file" id="audioInput" accept="audio/*" style="display: none;">
+      </div>
+
+      <!-- 文件预览模态框 -->
+      <div class="upload-preview" id="uploadPreview" style="display: none;">
+        <div class="preview-content">
+          <div class="preview-header">
+            <h3>文件预览</h3>
+            <button class="close-btn" id="closePreview">✕</button>
+          </div>
+          <div class="preview-body" id="previewBody"></div>
+          <div class="preview-footer">
+            <button class="btn btn-secondary" id="cancelUpload">取消</button>
+            <button class="btn btn-primary" id="confirmUpload">发送</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 信息面板（可折叠） -->
+    <aside class="info-panel" id="infoPanel">
+      <div class="panel-header">
+        <h3>房间信息</h3>
+      </div>
+      <div class="panel-content">
+        <div class="info-section">
+          <h4>房间描述</h4>
+          <p class="room-description" id="roomDescription">欢迎来到匿名聊天室</p>
+        </div>
+        <div class="info-section">
+          <h4>在线成员 (<span id="onlineCount">0</span>)</h4>
+          <div class="online-members" id="onlineMembers">
+            <!-- 在线成员列表 -->
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
+
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>连接中...</p>
+  </div>
+
+  <!-- 图片查看器 -->
+  <div class="image-viewer" id="imageViewer" style="display: none;">
+    <div class="viewer-overlay" id="viewerOverlay"></div>
+    <div class="viewer-content">
+      <button class="viewer-close" id="viewerClose">✕</button>
+      <img src="" alt="" id="viewerImage">
+    </div>
+  </div>
+
+  <!-- Socket.IO -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js"></script>
+
+  <!-- 工具函数 -->
+  <script src="/assets/js/utils/dom.js"></script>
+  <script src="/assets/js/utils/time.js"></script>
+
+  <!-- 服务层 -->
+  <script src="/assets/js/services/socketService.js"></script>
+  <script src="/assets/js/services/apiService.js"></script>
+  <script src="/assets/js/services/fileService.js"></script>
+
+  <!-- 组件 -->
+  <script src="/assets/js/components/Sidebar.js"></script>
+  <script src="/assets/js/components/RoomList.js"></script>
+  <script src="/assets/js/components/ChatArea.js"></script>
+  <script src="/assets/js/components/MessageList.js"></script>
+  <script src="/assets/js/components/InputArea.js"></script>
+
+  <!-- 主应用 -->
+  <script src="/assets/js/app.js"></script>
 </body>
 </html>

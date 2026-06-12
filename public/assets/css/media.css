@@ -1,0 +1,239 @@
+/* ===================================
+   媒体消息样式
+   =================================== */
+.message-image {
+  max-width: 300px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.message-image:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.message-file {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  min-width: 250px;
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.message.mine .message-file {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.message-file:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.message.mine .message-file:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-primary);
+  border-radius: var(--radius-md);
+  font-size: 20px;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.file-download {
+  color: inherit;
+  opacity: 0.7;
+  font-size: 18px;
+}
+
+.message-audio, .message-video {
+  max-width: 350px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+audio, video {
+  width: 100%;
+  outline: none;
+}
+
+/* ===================================
+   信息面板样式
+   =================================== */
+.info-panel {
+  width: 300px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition-base);
+}
+
+.info-panel.hidden {
+  transform: translateX(100%);
+}
+
+.panel-header {
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+.info-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.room-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.online-members {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.member-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.member-avatar {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.member-status {
+  font-size: 11px;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+/* 文件预览内容 */
+.preview-image {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+
+.preview-file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.preview-file-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-primary);
+  border-radius: var(--radius-md);
+  font-size: 24px;
+}
+
+.preview-file-details {
+  flex: 1;
+}
+
+.preview-file-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.preview-file-size {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 响应式调整 */
+@media (max-width: 1024px) {
+  .info-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+  }
+}

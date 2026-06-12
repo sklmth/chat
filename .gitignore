@@ -1,4 +1,11 @@
 node_modules/
 .env
 *.db
+*.db-*
 .claude/
+uploads/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+*.backup
